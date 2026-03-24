@@ -1,0 +1,152 @@
+/* src/components/common/Toast/Toast.css */
+
+.toast {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  min-width: 300px;
+  max-width: 500px;
+  animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Positions */
+.toast-bottom-right {
+  bottom: 2rem;
+  right: 2rem;
+}
+
+.toast-bottom-left {
+  bottom: 2rem;
+  left: 2rem;
+}
+
+.toast-top-right {
+  top: 2rem;
+  right: 2rem;
+}
+
+.toast-top-left {
+  top: 2rem;
+  left: 2rem;
+}
+
+.toast-bottom-center {
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.toast-top-center {
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Types */
+.toast-success {
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.95), rgba(34, 197, 94, 0.95));
+  color: white;
+}
+
+.toast-error {
+  background: linear-gradient(135deg, rgba(255, 68, 68, 0.95), rgba(255, 107, 157, 0.95));
+  color: white;
+}
+
+.toast-info {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+  color: white;
+}
+
+/* Animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast-bottom-center,
+.toast-top-center {
+  animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-message {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.toast-close {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.toast-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .toast {
+    min-width: auto;
+    max-width: calc(100vw - 4rem);
+  }
+
+  .toast-bottom-right,
+  .toast-top-right {
+    right: 1rem;
+  }
+
+  .toast-bottom-left,
+  .toast-top-left {
+    left: 1rem;
+  }
+
+  .toast-bottom-right,
+  .toast-bottom-left,
+  .toast-top-right,
+  .toast-top-left {
+    bottom: 1rem;
+  }
+}
