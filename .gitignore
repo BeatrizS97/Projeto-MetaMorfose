@@ -1,0 +1,34 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ambiente
+.env
+.env.local
+.env.development
+.env.production
+
+# Build
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Sistema
+Thumbs.db
