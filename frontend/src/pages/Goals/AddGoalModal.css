@@ -1,0 +1,292 @@
+/* src/pages/Goals/AddGoalModal.css */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 16, 32, 0.5);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+  animation: overlayIn 0.2s ease;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.add-modal {
+  background: rgba(255, 248, 252, 0.97);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 28px;
+  box-shadow: 0 32px 80px rgba(26, 16, 32, 0.2), 0 8px 24px rgba(255, 107, 157, 0.15);
+  width: 100%;
+  max-width: 500px;
+  animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.88) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Header */
+.add-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.75rem 2rem 0;
+}
+
+.add-modal__period-tag {
+  display: inline-flex;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255, 107, 157, 0.1);
+  border: 1px solid rgba(255, 107, 157, 0.2);
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #FF6B9D;
+  margin-bottom: 0.4rem;
+}
+
+.add-modal__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #1a1020;
+  letter-spacing: -0.02em;
+}
+
+.add-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(160, 143, 168, 0.1);
+  color: #a08fa8;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.add-modal__close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* Body */
+.add-modal__body {
+  padding: 1.5rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Field */
+.add-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.add-modal__label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #3d2c42;
+  letter-spacing: 0.02em;
+}
+
+.add-modal__required {
+  color: #FF6B9D;
+  margin-left: 0.15rem;
+}
+
+.add-modal__optional {
+  font-weight: 400;
+  color: #a08fa8;
+  font-size: 0.75rem;
+}
+
+/* Category buttons */
+.add-modal__categories {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.add-modal__cat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.8rem 0.6rem;
+  border-radius: 14px;
+  border: 1.5px solid rgba(160,143,168,0.2);
+  background: rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: center;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.add-modal__cat:hover {
+  border-color: rgba(255,107,157,0.4);
+  background: rgba(255,255,255,0.9);
+}
+
+.add-modal__cat--active.add-modal__cat--blue {
+  border-color: #667EEA;
+  background: rgba(102, 126, 234, 0.08);
+}
+.add-modal__cat--active.add-modal__cat--pink {
+  border-color: #FF6B9D;
+  background: rgba(255, 107, 157, 0.08);
+}
+.add-modal__cat--active.add-modal__cat--green {
+  border-color: #4ADE80;
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.add-modal__cat-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1a1020;
+  line-height: 1.2;
+}
+
+.add-modal__cat-desc {
+  font-size: 0.68rem;
+  color: #a08fa8;
+  line-height: 1.2;
+}
+
+/* Input / Textarea */
+.add-modal__input,
+.add-modal__textarea {
+  padding: 0.8rem 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1.5px solid rgba(160, 143, 168, 0.2);
+  border-radius: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: #1a1020;
+  transition: all 0.18s ease;
+  resize: vertical;
+  width: 100%;
+  outline: none;
+}
+
+.add-modal__input:focus,
+.add-modal__textarea:focus {
+  border-color: #FF6B9D;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+}
+
+.add-modal__input--error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08) !important;
+}
+
+.add-modal__textarea {
+  min-height: 100px;
+}
+
+.add-modal__field-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-modal__error {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.add-modal__char {
+  font-size: 0.72rem;
+  color: #c0afca;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+/* Submit */
+.add-modal__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #FF6B9D, #764BA2);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(255, 107, 157, 0.35);
+  letter-spacing: 0.01em;
+  margin-top: 0.25rem;
+}
+
+.add-modal__submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(255, 107, 157, 0.45);
+}
+
+.add-modal__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.add-modal__spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.add-modal__hint {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #c0afca;
+  font-weight: 500;
+}
+
+.add-modal__hint kbd {
+  display: inline-flex;
+  padding: 0.1rem 0.3rem;
+  background: rgba(160,143,168,0.12);
+  border: 1px solid rgba(160,143,168,0.2);
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.68rem;
+}
+
+@media (max-width: 480px) {
+  .add-modal { border-radius: 20px; }
+  .add-modal__header { padding: 1.5rem 1.5rem 0; }
+  .add-modal__body { padding: 1.25rem 1.5rem 1.5rem; }
+  .add-modal__categories { grid-template-columns: 1fr 1fr; }
+}
