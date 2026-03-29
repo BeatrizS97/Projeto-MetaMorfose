@@ -38,6 +38,12 @@ const goalSchema = new mongoose.Schema({
     default: false,
     index: true, // Índice para filtros rápidos
   },
+  order: {
+    type: Number,
+    default: 0,
+    min: 0,
+    index: true,
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -64,5 +70,6 @@ goalSchema.pre('save', function() {
 goalSchema.index({ userId: 1, category: 1 });
 goalSchema.index({ userId: 1, completed: 1 });
 goalSchema.index({ userId: 1, createdAt: -1 });
+goalSchema.index({ userId: 1, category: 1, period: 1, order: 1 });
 
 module.exports = mongoose.model('Goal', goalSchema);
