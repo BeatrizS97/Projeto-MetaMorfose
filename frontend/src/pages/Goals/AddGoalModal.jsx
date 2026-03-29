@@ -11,22 +11,28 @@ const CloseIcon = () => (
 
 const CATEGORIES = [
   {
-    key: 'personal',
-    label: 'Pessoal',
-    desc: 'Crescimento & bem-estar',
+    key: 'corpo',
+    label: 'Corpo',
+    desc: 'Fitness, alimentação, sono',
+    color: 'green',
+  },
+  {
+    key: 'mente',
+    label: 'Mente',
+    desc: 'Estudo, leitura, hábitos',
     color: 'blue',
   },
   {
-    key: 'career',
+    key: 'carreira',
     label: 'Carreira',
-    desc: 'Trabalho & projetos',
+    desc: 'Trabalho, dinheiro, projetos',
     color: 'pink',
   },
   {
-    key: 'academia',
-    label: 'Saúde',
-    desc: 'Saúde & exercícios',
-    color: 'green',
+    key: 'vida',
+    label: 'Vida',
+    desc: 'Relacionamentos, hobbies, lazer',
+    color: 'orange',
   },
 ];
 

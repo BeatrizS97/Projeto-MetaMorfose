@@ -2,23 +2,26 @@
 
 // Categorias de metas
 export const GOAL_CATEGORIES = {
-  PERSONAL: 'personal',
-  CAREER:   'career',
-  ACADEMIA: 'academia',
+  CORPO: 'corpo',
+  MENTE: 'mente',
+  CARREIRA: 'carreira',
+  VIDA: 'vida',
 };
 
 // Rótulos para as categorias de metas
 export const GOAL_CATEGORY_LABELS = {
-  [GOAL_CATEGORIES.PERSONAL]: 'Pessoal',
-  [GOAL_CATEGORIES.CAREER]:   'Carreira',
-  [GOAL_CATEGORIES.ACADEMIA]: 'Saúde',
+  [GOAL_CATEGORIES.CORPO]: 'Corpo',
+  [GOAL_CATEGORIES.MENTE]: 'Mente',
+  [GOAL_CATEGORIES.CARREIRA]: 'Carreira',
+  [GOAL_CATEGORIES.VIDA]: 'Vida',
 };
 
 // Cores associadas a cada categoria de meta
 export const GOAL_CATEGORY_COLORS = {
-  [GOAL_CATEGORIES.PERSONAL]: '#667EEA',
-  [GOAL_CATEGORIES.CAREER]:   '#FF6B9D',
-  [GOAL_CATEGORIES.ACADEMIA]: '#4ADE80',
+  [GOAL_CATEGORIES.CORPO]: '#4ADE80',      // Verde para Corpo
+  [GOAL_CATEGORIES.MENTE]: '#667EEA',      // Azul para Mente
+  [GOAL_CATEGORIES.CARREIRA]: '#FF6B9D',   // Rosa para Carreira
+  [GOAL_CATEGORIES.VIDA]: '#FFA500',       // Laranja para Vida
 };
 
 // Períodos para metas
