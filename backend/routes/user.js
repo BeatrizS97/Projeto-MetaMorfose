@@ -40,11 +40,12 @@ router.delete(
 );
 
 /**
- * GET /api/user/export
+ * POST /api/user/export
  * Exportar dados do usuário (LGPD - Artigo 17)
  */
-router.get(
+router.post(
   '/export',
+  validationRules.exportDataValidation,
   userController.exportUserData
 );
 
