@@ -1,7 +1,76 @@
 // src/components/CustomIcons.jsx
 import React from 'react';
+import Lottie from 'lottie-react';
 
-export const RocketIcon = ({ size = 80 }) => (
+// Animated Butterfly Component - Using local Lottie JSON
+export const ButterflyLottieAnimation = ({ 
+  size = 100, 
+  className = '',
+  speed = 1
+}) => {
+  const [animationData, setAnimationData] = React.useState(null);
+  const [error, setError] = React.useState(false);
+
+  React.useEffect(() => {
+    const loadAnimation = async () => {
+      try {
+        const response = await fetch('/assets/animations/butterfly.json');
+        if (!response.ok) throw new Error('Failed to load animation');
+        let data = await response.json();
+        
+        // Slow down wing flapping by increasing frame duration
+        if (data.layers) {
+          data.layers.forEach(layer => {
+            if (layer.shapes) {
+              layer.shapes.forEach(shape => {
+                if (shape.it) {
+                  shape.it.forEach(item => {
+                    if (item.a && item.a.k) {
+                      // Slow down animated properties
+                      if (Array.isArray(item.a.k)) {
+                        item.a.k.forEach(keyframe => {
+                          if (keyframe.t !== undefined) {
+                            keyframe.t = keyframe.t / 0.6;
+                          }
+                        });
+                      }
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+        
+        setAnimationData(data);
+      } catch (err) {
+        console.error('Error loading Lottie animation:', err);
+        setError(true);
+      }
+    };
+
+    loadAnimation();
+  }, []);
+
+  if (error) {
+    return <div style={{ width: size, height: size, background: '#f0f0f0', borderRadius: '50%' }} />;
+  }
+
+  return animationData ? (
+    <Lottie
+      animationData={animationData}
+      loop={true}
+      autoplay={true}
+      speed={speed}
+      style={{ width: size, height: size }}
+      className={className}
+    />
+  ) : (
+    <div style={{ width: size, height: size, background: '#f5f0fa', borderRadius: '50%' }} />
+  );
+};
+
+export const RocketIcon = React.memo(({ size = 80 }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
     <defs>
       <linearGradient id="rocket-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -54,7 +123,7 @@ export const RocketIcon = ({ size = 80 }) => (
     
     {/* Janela */}
     <circle cx="50" cy="40" r="8" fill="white" opacity="0.9" />
-    <circle cx="50" cy="40" r="6" fill="#667EEA" opacity="0.3" />
+      <circle cx="50" cy="40" r="6" fill="#667EEA" opacity="0.5" />
     <circle cx="48" cy="38" r="2" fill="white" opacity="0.8" />
     
     {/* Detalhes decorativos */}
@@ -80,9 +149,9 @@ export const RocketIcon = ({ size = 80 }) => (
       <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite"/>
     </circle>
   </svg>
-);
+));
 
-export const SuccessStarIcon = ({ size = 32 }) => (
+export const SuccessStarIcon = React.memo(({ size = 32 }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
     <defs>
       <linearGradient id="star-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -125,9 +194,9 @@ export const SuccessStarIcon = ({ size = 32 }) => (
       <animate attributeName="opacity" values="1;0.5;1" dur="1.8s" repeatCount="indefinite"/>
     </circle>
   </svg>
-);
+));
 
-export const ChartIcon = ({ size = 32 }) => (
+export const ChartIcon = React.memo(({ size = 32 }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
     <defs>
       <linearGradient id="chart-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -179,9 +248,9 @@ export const ChartIcon = ({ size = 32 }) => (
       <animate attributeName="r" values="0;4" dur="0.3s" begin="2.1s" fill="freeze"/>
     </circle>
   </svg>
-);
+));
 
-export const CalendarIcon = ({ size = 32 }) => (
+export const CalendarIcon = React.memo(({ size = 32 }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
     <defs>
       <linearGradient id="calendar-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -220,9 +289,9 @@ export const CalendarIcon = ({ size = 32 }) => (
     </circle>
     <circle cx="54" cy="74" r="2" fill="white" />
   </svg>
-);
+));
 
-export const TargetIcon = ({ size = 32 }) => (
+export const TargetIcon = React.memo(({ size = 32 }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
     <defs>
       <linearGradient id="target-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -242,9 +311,9 @@ export const TargetIcon = ({ size = 32 }) => (
     {/* Ponto de impacto */}
     <circle cx="50" cy="50" r="3" fill="white" />
   </svg>
-);
+));
 
-export const IdeaIcon = ({ size = 24 }) => (
+export const IdeaIcon = React.memo(({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
     <defs>
       <linearGradient id="bulb-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -278,12 +347,12 @@ export const IdeaIcon = ({ size = 24 }) => (
       <animate attributeName="opacity" values="0.4;0.9;0.4" dur="1.4s" repeatCount="indefinite"/>
     </path>
   </svg>
-);
+));
 
 
 // Ícone principal - MetaMorfose
 
-export const MetaMorfoseIcon = ({ size = 64, className = "" }) => (
+export const MetaMorfoseIcon = React.memo(({ size = 64, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 200 200" fill="none" className={className}>
     <defs>
       <filter id="soft-shadow" x="-50%" y="-50%" width="200%" height="200%">
@@ -380,9 +449,9 @@ export const MetaMorfoseIcon = ({ size = 64, className = "" }) => (
       </g>
     </g>
   </svg>
-);
+));
 
-export const ButterflyAuthIcon = ({ size = 64, className = "" }) => (
+export const ButterflyAuthIcon = React.memo(({ size = 64, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 128 128" fill="none" className={className}>
     <defs>
       <linearGradient id="bf-wing-left" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -416,7 +485,7 @@ export const ButterflyAuthIcon = ({ size = 64, className = "" }) => (
     <circle cx="52" cy="84" r="3" fill="white" opacity="0.65" />
     <circle cx="76" cy="84" r="3" fill="white" opacity="0.6" />
   </svg>
-);
+));
 
 // Ícones de Status de Tarefas
 
@@ -973,6 +1042,219 @@ export const SparkleIcon = ({ size = 24, className = "" }) => (
       d="M19 3L19.5 5.5L22 6L19.5 6.5L19 9L18.5 6.5L16 6L18.5 5.5L19 3Z" 
       fill="url(#sparkle-grad)"
     />
+  </svg>
+);
+
+// Theme toggle icons for dark mode
+export const SunIcon = ({ size = 20, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 1V3M12 21V23M23 12H21M3 12H1M20.485 3.515L19.071 4.929M4.929 19.071L3.515 20.485M20.485 20.485L19.071 19.071M4.929 4.929L3.515 3.515" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const MoonIcon = ({ size = 20, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="currentColor" />
+  </svg>
+);
+
+// Top navigation icons
+export const TopNavHomeIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M3 11L12 4L21 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M6 10.5V20H18V10.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const TopNavGoalsIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth="2" />
+    <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="2" />
+    <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+  </svg>
+);
+
+export const TopNavDashboardIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="2" />
+    <rect x="13" y="3" width="8" height="5" rx="2" stroke="currentColor" strokeWidth="2" />
+    <rect x="13" y="10" width="8" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
+    <rect x="3" y="13" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="2" />
+  </svg>
+);
+
+export const TopNavProfileIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
+    <path d="M5 19C6.2 15.9 8.8 14.5 12 14.5C15.2 14.5 17.8 15.9 19 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+export const TopNavChevronIcon = ({ size = 14, className = '', isOpen = false }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    className={className}
+    style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}
+  >
+    <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const TopNavDayIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
+    <path d="M12 2V4M12 20V22M22 12H20M4 12H2M19.07 4.93L17.66 6.34M6.34 17.66L4.93 19.07M19.07 19.07L17.66 17.66M6.34 6.34L4.93 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+export const TopNavWeekIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <rect x="3" y="5" width="18" height="16" rx="3" stroke="currentColor" strokeWidth="2" />
+    <path d="M8 3V7M16 3V7M3 10H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M7.5 14H9.5M12 14H14M16.5 14H18.5M7.5 17H9.5M12 17H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+export const TopNavMonthIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <rect x="3" y="4" width="18" height="17" rx="3" stroke="currentColor" strokeWidth="2" />
+    <path d="M8 2.5V6M16 2.5V6M3 9H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M8 13H12M8 16.5H10.5M14 16.5H16.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+export const TopNavYearIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M4 6L12 2L20 6V11C20 16 16.6 20.1 12 21.5C7.4 20.1 4 16 4 11V6Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    <path d="M9 11L11 13L15 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const TopNavLogoutIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M10 4H6C4.9 4 4 4.9 4 6V18C4 19.1 4.9 20 6 20H10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 16L19 12L14 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M19 12H10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// Landing page icons
+export const LandingArrowIcon = ({ size = 18, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M13 6L19 12L13 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const LandingCheckIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" opacity="0.3" />
+    <path d="M7.5 12.5L10.5 15.5L16.5 9.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const LandingGoalJourneyIllustration = ({ className = '' }) => (
+  <svg viewBox="0 0 320 320" fill="none" className={className} role="img" aria-label="Alvo com orbitas e cartoes animados">
+    <defs>
+      <linearGradient id="landing-hero-g1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FF6B9D"/>
+        <stop offset="100%" stopColor="#764BA2"/>
+      </linearGradient>
+      <linearGradient id="landing-hero-g2" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FFA500"/>
+        <stop offset="100%" stopColor="#FF6B9D"/>
+      </linearGradient>
+      <linearGradient id="landing-hero-g3" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#667EEA"/>
+        <stop offset="100%" stopColor="#764BA2"/>
+      </linearGradient>
+      <filter id="landing-hero-glow">
+        <feGaussianBlur stdDeviation="2" result="blur"/>
+        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+      </filter>
+    </defs>
+
+    <circle cx="160" cy="160" r="148" stroke="rgba(255,107,157,0.08)" strokeWidth="1" fill="none"/>
+    <circle cx="160" cy="160" r="120" stroke="rgba(118,75,162,0.06)" strokeWidth="1" fill="none"/>
+    <circle cx="160" cy="160" r="90" stroke="rgba(255,107,157,0.1)" strokeWidth="1" fill="none"/>
+
+    <circle cx="160" cy="160" r="72" stroke="url(#landing-hero-g1)" strokeWidth="2.2" fill="none" opacity="0.85"/>
+    <circle cx="160" cy="160" r="52" stroke="url(#landing-hero-g1)" strokeWidth="1.9" fill="none" opacity="0.55"/>
+    <circle cx="160" cy="160" r="32" stroke="url(#landing-hero-g2)" strokeWidth="1.6" fill="none" opacity="0.55"/>
+    <circle cx="160" cy="160" r="7" fill="#FFA500">
+      <animate attributeName="r" values="6.2;7.5;6.2" dur="5.2s" repeatCount="indefinite"/>
+    </circle>
+
+    <path d="M160 82 L160 95" stroke="url(#landing-hero-g1)" strokeWidth="1.6" strokeLinecap="round" opacity="0.75"/>
+    <path d="M160 225 L160 238" stroke="url(#landing-hero-g1)" strokeWidth="1.6" strokeLinecap="round" opacity="0.75"/>
+    <path d="M82 160 L95 160" stroke="url(#landing-hero-g1)" strokeWidth="1.6" strokeLinecap="round" opacity="0.75"/>
+    <path d="M225 160 L238 160" stroke="url(#landing-hero-g1)" strokeWidth="1.6" strokeLinecap="round" opacity="0.75"/>
+
+    <g>
+      <animateTransform attributeName="transform" type="rotate" from="0 160 160" to="360 160 160" dur="16s" repeatCount="indefinite"/>
+      <circle cx="160" cy="40" r="4.8" fill="#FF6B9D"/>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="rotate" from="120 160 160" to="480 160 160" dur="22s" repeatCount="indefinite"/>
+      <circle cx="160" cy="40" r="4.2" fill="#764BA2"/>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="rotate" from="240 160 160" to="600 160 160" dur="30s" repeatCount="indefinite"/>
+      <circle cx="160" cy="40" r="3.6" fill="#FFA500"/>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.06;0.16;0.34;0.46;1" dur="9s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="translate" values="0 0; 0 -8; 0 0" dur="4s" repeatCount="indefinite"/>
+      <rect x="18" y="80" width="76" height="40" rx="10" fill="rgba(255,255,255,0.92)" filter="url(#landing-hero-glow)"/>
+      <rect x="18" y="80" width="76" height="40" rx="10" stroke="rgba(255,107,157,0.2)" strokeWidth="1"/>
+      <circle cx="34" cy="100" r="7" fill="url(#landing-hero-g2)"/>
+      <text x="46" y="95" fontSize="6.5" fontWeight="700" fill="#a08fa8" fontFamily="DM Sans, sans-serif">PROGRESSO</text>
+      <rect x="46" y="99" width="38" height="4" rx="2" fill="rgba(160,143,168,0.16)"/>
+      <rect x="46" y="99" width="16" height="4" rx="2" fill="url(#landing-hero-g1)"/>
+      <text x="46" y="111" fontSize="9" fontWeight="700" fill="#1a1020" fontFamily="DM Sans, sans-serif">42%</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.3;0.42;0.58;0.68;1" dur="9s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="translate" values="0 0; 0 10; 0 0" dur="5s" repeatCount="indefinite"/>
+      <rect x="226" y="200" width="76" height="40" rx="10" fill="rgba(255,255,255,0.92)" filter="url(#landing-hero-glow)"/>
+      <rect x="226" y="200" width="76" height="40" rx="10" stroke="rgba(118,75,162,0.2)" strokeWidth="1"/>
+      <circle cx="242" cy="220" r="7" fill="url(#landing-hero-g3)"/>
+      <text x="254" y="215" fontSize="6.5" fontWeight="700" fill="#a08fa8" fontFamily="DM Sans, sans-serif">PROGRESSO</text>
+      <rect x="254" y="219" width="38" height="4" rx="2" fill="rgba(160,143,168,0.16)"/>
+      <rect x="254" y="219" width="33" height="4" rx="2" fill="url(#landing-hero-g3)"/>
+      <text x="254" y="231" fontSize="9" fontWeight="700" fill="#1a1020" fontFamily="DM Sans, sans-serif">87%</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.54;0.64;0.8;0.9;1" dur="9s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="translate" values="0 0; 0 -6; 0 0" dur="6s" repeatCount="indefinite"/>
+      <rect x="238" y="90" width="72" height="52" rx="10" fill="rgba(255,255,255,0.92)" filter="url(#landing-hero-glow)"/>
+      <rect x="238" y="90" width="72" height="52" rx="10" stroke="rgba(255,165,0,0.2)" strokeWidth="1"/>
+      <text x="246" y="107" fontSize="8" fontWeight="700" fill="#a08fa8" fontFamily="DM Sans, sans-serif">PROGRESSO</text>
+      <rect x="246" y="112" width="56" height="6" rx="3" fill="rgba(160,143,168,0.15)"/>
+      <rect x="246" y="112" width="38" height="6" rx="3" fill="url(#landing-hero-g1)"/>
+      <text x="246" y="128" fontSize="11" fontWeight="700" fill="#1a1020" fontFamily="DM Sans, sans-serif">68%</text>
+      <rect x="246" y="132" width="40" height="3" rx="1.5" fill="rgba(26,16,32,0.08)"/>
+    </g>
+
+    <circle cx="85" cy="230" r="3" fill="#FF8CB1" opacity="0.7">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="240" cy="60" r="2.5" fill="#FF8CB1" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0.2;0.7" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="60" cy="150" r="2" fill="#FF8CB1" opacity="0.6">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="270" cy="150" r="2" fill="#FF8CB1" opacity="0.5">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2.2s" repeatCount="indefinite"/>
+    </circle>
   </svg>
 );
 
