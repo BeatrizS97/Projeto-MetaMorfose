@@ -109,55 +109,10 @@ async function getUserAuditLog(userId, limit = 100) {
   }
 }
 
-/**
- * Detectar comportamento suspeito (múltiplas tentativas de login falhadas)
- */
-async function checkSuspiciousActivity(ipAddress, threshold = 5) {
-  try {
-    const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-    const failedAttempts = await AuditLog.countDocuments({
-      ipAddress,
-      action: 'AUTH_LOGIN_FAILED',
-      timestamp: { $gte: hourAgo },
-    });
-
-    if (failedAttempts >= threshold) {
-      console.error(`🚨 [SECURITY] IP ${ipAddress} ultrapassou limite de tentativas falhadas: ${failedAttempts}`);
-      return true;
-    }
-
-    return false;
-  } catch (error) {
-    console.error('Erro ao verificar atividade suspeita:', error);
-    return false;
-  }
-}
-
-/**
- * Limpar logs antigos (LGPD permite retenção de 1 ano)
- * Deve ser executado periodicamente
- */
-async function cleanOldLogs(daysToKeep = 365) {
-  try {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
-
-    const result = await AuditLog.deleteMany({
-      timestamp: { $lt: cutoffDate },
-      lgpdRelevant: false, // Manter logs LGPD relevantes mais tempo
-    });
-
-    console.log(`🗑️  Limpeza de logs concluída: ${result.deletedCount} registros removidos`);
-  } catch (error) {
-    console.error('Erro ao limpar logs:', error);
-  }
-}
 
 module.exports = {
   logAction,
   logUnauthorizedAccess,
   getUserAuditLog,
-  checkSuspiciousActivity,
-  cleanOldLogs,
 };
