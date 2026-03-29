@@ -1,14 +1,16 @@
 // middleware/validation.js - Validações reutilizáveis
 const { body } = require('express-validator');
-const { CONSTRAINTS, GOAL_CATEGORIES, GOAL_PERIODS } = require('../utils/constants');
+const { CONSTRAINTS, GOAL_CATEGORIES, GOAL_PERIODS, EMAIL_REGEX } = require('../utils/constants');
+
+const SAFE_AVATAR_REGEX = /^(https:\/\/|data:image\/(png|jpeg|jpg|webp);base64,)/i;
 
 module.exports = {
   // Validações de registro
   registerValidation: [
     body('email')
-      .isEmail()
       .trim()
       .toLowerCase()
+      .matches(EMAIL_REGEX)
       .withMessage('Email inválido'),
     body('password')
       .isLength({ min: CONSTRAINTS.password.minLength })
@@ -30,9 +32,9 @@ module.exports = {
   // Validações de login
   loginValidation: [
     body('email')
-      .isEmail()
       .trim()
       .toLowerCase()
+      .matches(EMAIL_REGEX)
       .withMessage('Email inválido'),
     body('password')
       .notEmpty()
@@ -42,9 +44,9 @@ module.exports = {
   // Validações de recuperação de senha
   forgotPasswordValidation: [
     body('email')
-      .isEmail()
       .trim()
       .toLowerCase()
+      .matches(EMAIL_REGEX)
       .withMessage('Email inválido'),
   ],
 
@@ -94,6 +96,10 @@ module.exports = {
       .optional()
       .isBoolean()
       .withMessage('Completed deve ser um booleano'),
+    body('order')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('Order deve ser um inteiro maior ou igual a zero'),
   ],
 
   // Validações de perfil
@@ -107,10 +113,20 @@ module.exports = {
       .withMessage(`Nome não pode ter mais de ${CONSTRAINTS.name.maxLength} caracteres`),
     body('email')
       .optional()
-      .isEmail()
       .trim()
       .toLowerCase()
+      .matches(EMAIL_REGEX)
       .withMessage('Email inválido'),
+    body('avatar')
+      .optional({ nullable: true })
+      .isString()
+      .custom((value) => {
+        if (!value) return true;
+        return SAFE_AVATAR_REGEX.test(value);
+      })
+      .withMessage('Avatar deve ser URL HTTPS ou data URL de imagem segura')
+      .isLength({ max: CONSTRAINTS.avatar.maxLength })
+      .withMessage(`Avatar nao pode ter mais de ${CONSTRAINTS.avatar.maxLength} caracteres`),
   ],
 
   // Validações de alteração de senha
@@ -130,5 +146,12 @@ module.exports = {
     body('password')
       .notEmpty()
       .withMessage('Senha é obrigatória'),
+  ],
+
+  // Validações de exportação de dados
+  exportDataValidation: [
+    body('password')
+      .notEmpty()
+      .withMessage('Senha é obrigatória para exportar dados'),
   ],
 };
