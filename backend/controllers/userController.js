@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 const User = require('../models/User');
 const Goal = require('../models/Goal');
+const AuditLog = require('../models/AuditLog');
 const config = require('../config/env');
 const { clearAuthCookie } = require('../middleware/auth');
 const { ERRORS } = require('../utils/constants');
@@ -19,7 +20,7 @@ exports.updateProfile = async (req, res) => {
   }
 
   try {
-    const { name, email } = req.body;
+    const { name, email, avatar } = req.body;
     const updateData = {};
 
     // Atualizar nome se fornecido
@@ -38,6 +39,10 @@ exports.updateProfile = async (req, res) => {
       updateData.email = lowerEmail;
     }
 
+    if (avatar !== undefined) {
+      updateData.avatar = avatar || '';
+    }
+
     // Atualizar usuário
     const user = await User.findByIdAndUpdate(req.userId, updateData, { new: true });
 
@@ -47,6 +52,7 @@ exports.updateProfile = async (req, res) => {
         id: user._id.toString(),
         name: user.name,
         email: user.email,
+        avatar: user.avatar,
       },
     });
   } catch (error) {
@@ -158,15 +164,32 @@ exports.deleteAccount = async (req, res) => {
  * Exportar dados do usuário (LGPD - Direito de Acesso - Artigo 17)
  */
 exports.exportUserData = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
+    const { password } = req.body;
+
     // Buscar usuário
-    const user = await User.findById(req.userId).select('-password');
+    const user = await User.findById(req.userId).select('+password');
     if (!user) {
       return res.status(404).json({ error: ERRORS.USER_NOT_FOUND });
     }
 
-    // Buscar metas do usuário
-    const goals = await Goal.find({ userId: req.userId }).lean();
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ error: ERRORS.WRONG_PASSWORD });
+    }
+
+    const [goals, auditLogs] = await Promise.all([
+      Goal.find({ userId: req.userId }).lean(),
+      AuditLog.find({ userId: req.userId })
+        .sort({ timestamp: -1 })
+        .limit(500)
+        .lean(),
+    ]);
 
     // Preparar dados para exportação
     const exportData = {
@@ -174,6 +197,7 @@ exports.exportUserData = async (req, res) => {
         id: user._id.toString(),
         name: user.name,
         email: user.email,
+        avatar: user.avatar,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         lgpdConsent: user.lgpdConsent,
@@ -190,6 +214,16 @@ exports.exportUserData = async (req, res) => {
         createdAt: goal.createdAt,
         updatedAt: goal.updatedAt,
       })),
+      auditLogs: auditLogs.map((entry) => ({
+        id: entry._id.toString(),
+        action: entry.action,
+        method: entry.method,
+        path: entry.path,
+        resultStatus: entry.resultStatus,
+        resultCode: entry.resultCode,
+        description: entry.description,
+        timestamp: entry.timestamp,
+      })),
       exportDate: new Date(),
       exportVersion: '1.0',
     };
@@ -201,6 +235,8 @@ exports.exportUserData = async (req, res) => {
       description: 'Dados do usuário exportados conforme solicitação LGPD',
       lgpdRelevant: true,
     });
+
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
 
     // Retornar dados como JSON
     res.json({
