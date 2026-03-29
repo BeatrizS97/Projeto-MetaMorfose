@@ -5,6 +5,7 @@ const { validationResult } = require('express-validator');
 const User = require('../models/User');
 const config = require('../config/env');
 const { setAuthCookie, clearAuthCookie } = require('../middleware/auth');
+const { generateCsrfToken, setCsrfCookie } = require('../middleware/csrf');
 const { ERRORS } = require('../utils/constants');
 const { logAction } = require('../utils/auditLogger');
 
@@ -58,11 +59,18 @@ exports.register = async (req, res) => {
     const token = jwt.sign(
       { id: user._id.toString() },
       config.JWT_SECRET,
-      { expiresIn: config.JWT_EXPIRES_IN }
+      {
+        algorithm: 'HS256',
+        issuer: config.JWT_ISSUER,
+        audience: config.JWT_AUDIENCE,
+        subject: user._id.toString(),
+        expiresIn: config.JWT_EXPIRES_IN,
+      }
     );
 
     // Definir cookie seguro
     setAuthCookie(res, token);
+    setCsrfCookie(res, generateCsrfToken());
 
     // Retornar dados do usuário (sem senha)
     res.status(201).json({
@@ -71,6 +79,7 @@ exports.register = async (req, res) => {
         id: user._id.toString(),
         email: user.email,
         name: user.name,
+        avatar: user.avatar,
       },
     });
   } catch (error) {
@@ -108,7 +117,13 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id.toString() },
       config.JWT_SECRET,
-      { expiresIn: config.JWT_EXPIRES_IN }
+      {
+        algorithm: 'HS256',
+        issuer: config.JWT_ISSUER,
+        audience: config.JWT_AUDIENCE,
+        subject: user._id.toString(),
+        expiresIn: config.JWT_EXPIRES_IN,
+      }
     );
 
     // Log auditoria - Login bem-sucedido
@@ -121,6 +136,7 @@ exports.login = async (req, res) => {
 
     // Definir cookie seguro
     setAuthCookie(res, token);
+    setCsrfCookie(res, generateCsrfToken());
 
     // Retornar dados do usuário (sem senha)
     res.json({
@@ -129,6 +145,7 @@ exports.login = async (req, res) => {
         id: user._id.toString(),
         email: user.email,
         name: user.name,
+        avatar: user.avatar,
       },
     });
   } catch (error) {
@@ -148,12 +165,15 @@ exports.verify = async (req, res) => {
       return res.status(404).json({ error: ERRORS.USER_NOT_FOUND });
     }
 
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+
     res.json({
       success: true,
       user: {
         id: user._id.toString(),
         email: user.email,
         name: user.name,
+        avatar: user.avatar,
       },
     });
   } catch (error) {
@@ -221,4 +241,17 @@ exports.forgotPassword = async (req, res) => {
     console.error('Erro em forgot password:', error);
     return res.status(500).json({ error: ERRORS.INTERNAL_ERROR });
   }
+};
+
+/**
+ * Gerar token CSRF para double-submit cookie.
+ */
+exports.csrfToken = (req, res) => {
+  const token = generateCsrfToken();
+  setCsrfCookie(res, token);
+
+  return res.json({
+    success: true,
+    csrfToken: token,
+  });
 };
