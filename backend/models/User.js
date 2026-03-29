@@ -1,6 +1,6 @@
 // models/User.js
 const mongoose = require('mongoose');
-const { CONSTRAINTS } = require('../utils/constants');
+const { CONSTRAINTS, EMAIL_REGEX } = require('../utils/constants');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -16,7 +16,8 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     maxlength: [CONSTRAINTS.email.maxLength, 'Email muito longo'],
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Email inválido'],
+    // Aceita TLDs modernos (.test, .technology, etc.) mantendo a estrutura basica de email.
+    match: [EMAIL_REGEX, 'Email inválido'],
   },
   password: {
     type: String,
@@ -58,6 +59,11 @@ const userSchema = new mongoose.Schema({
   consentAnalytics: {
     type: Boolean,
     default: false,
+  },
+  avatar: {
+    type: String,
+    default: '',
+    maxlength: [CONSTRAINTS.avatar.maxLength, 'Avatar muito grande'],
   },
 });
 
