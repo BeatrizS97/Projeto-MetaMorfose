@@ -1,5 +1,46 @@
 // src/services/api.js
-const API_URL = 'http://localhost:5000/api'; // Ajuste se seu backend estiver em outra porta
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+if (import.meta.env.PROD && API_URL.startsWith('http://')) {
+  throw new Error('VITE_API_URL deve usar HTTPS em produção.');
+}
+
+let csrfTokenCache = null;
+
+const CSRF_EXEMPT_URLS = new Set([
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+  '/auth/csrf-token',
+]);
+
+const shouldAttachCsrf = (method, url) => {
+  const normalizedMethod = (method || 'GET').toUpperCase();
+  const isMutatingMethod = normalizedMethod === 'POST' || normalizedMethod === 'PUT' || normalizedMethod === 'PATCH' || normalizedMethod === 'DELETE';
+  return isMutatingMethod && !CSRF_EXEMPT_URLS.has(url);
+};
+
+const ensureCsrfToken = async () => {
+  if (csrfTokenCache) {
+    return csrfTokenCache;
+  }
+
+  const response = await fetch(`${API_URL}/auth/csrf-token`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Não foi possível obter token CSRF');
+  }
+
+  const data = await response.json();
+  csrfTokenCache = data?.csrfToken || null;
+  return csrfTokenCache;
+};
 
 const normalizeGoal = (goal) => {
   if (!goal) return goal;
@@ -14,13 +55,24 @@ const normalizeGoal = (goal) => {
 
 // Função auxiliar para requisições com cookies
 const apiFetch = async (url, options = {}) => {
+  const method = (options.method || 'GET').toUpperCase();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  if (shouldAttachCsrf(method, url)) {
+    const csrfToken = await ensureCsrfToken();
+    if (csrfToken) {
+      headers['x-csrf-token'] = csrfToken;
+    }
+  }
+
   const config = {
     ...options,
     credentials: 'include', // Essencial para HTTP-only cookies
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    }
+    method,
+    headers,
   };
 
   const response = await fetch(`${API_URL}${url}`, config);
@@ -65,6 +117,7 @@ export const authService = {
   },
 
   async logout() {
+    csrfTokenCache = null;
     return apiFetch('/auth/logout', {
       method: 'POST'
     });
@@ -113,10 +166,10 @@ export const goalsService = {
 
 // USER
 export const userService = {
-  async updateProfile(name, email) {
+  async updateProfile(name, email, avatar) {
     const data = await apiFetch('/user/profile', {
       method: 'PUT',
-      body: JSON.stringify({ name, email })
+      body: JSON.stringify({ name, email, avatar })
     });
 
     return data.user;
@@ -134,6 +187,14 @@ export const userService = {
       method: 'DELETE',
       body: JSON.stringify({ password })
     });
+  },
+
+  async exportData(password) {
+    const data = await apiFetch('/user/export', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    });
+    return data.data;
   }
 };
 
