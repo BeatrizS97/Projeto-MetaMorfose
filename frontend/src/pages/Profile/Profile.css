@@ -43,6 +43,13 @@
   box-shadow: 0 6px 24px rgba(255, 107, 157, 0.35);
 }
 
+.profile-avatar-large__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .profile-header h1 {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.5rem;
@@ -172,6 +179,65 @@
   box-shadow: 0 0 0 3px rgba(239,68,68,0.08);
 }
 
+.profile-avatar-upload {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem;
+  border: 1.5px dashed rgba(160,143,168,0.35);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.55);
+}
+
+.profile-avatar-preview {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B9D, #764BA2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.profile-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar-upload-actions {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.profile-avatar-upload-input {
+  display: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(118,75,162,0.3);
+  border-radius: 10px;
+  background: rgba(118,75,162,0.08);
+  color: #764BA2;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: rgba(118,75,162,0.15);
+}
+
 .field-error {
   display: block;
   color: #ef4444;
@@ -219,6 +285,28 @@
   background: rgba(239,68,68,0.05);
   border: 1.5px solid rgba(239,68,68,0.2);
   border-radius: 18px;
+}
+
+.profile-export-box {
+  padding: 1.2rem;
+  border: 1.5px solid rgba(102,126,234,0.24);
+  background: rgba(102,126,234,0.07);
+  border-radius: 16px;
+  margin-bottom: 1rem;
+}
+
+.profile-export-box h3 {
+  margin: 0 0 0.5rem 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.02rem;
+  color: #2f2340;
+}
+
+.profile-export-box p {
+  margin: 0 0 0.9rem 0;
+  color: #66556f;
+  font-size: 0.84rem;
+  line-height: 1.5;
 }
 
 .danger-zone h3 {
