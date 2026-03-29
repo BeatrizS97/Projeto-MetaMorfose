@@ -270,10 +270,11 @@ export const Dashboard = () => {
     );
   }
 
-  const personal = stats?.byCategory?.personal || 0;
-  const career   = stats?.byCategory?.career   || 0;
-  const academia = stats?.byCategory?.academia  || 0;
-  const totalCat = personal + career + academia;
+  const corpo    = stats?.byCategory?.corpo    || 0;
+  const mente    = stats?.byCategory?.mente    || 0;
+  const carreira = stats?.byCategory?.carreira || 0;
+  const vida     = stats?.byCategory?.vida     || 0;
+  const totalCat = corpo + mente + carreira + vida;
 
   return (
     <div className="dashboard">
@@ -373,9 +374,10 @@ export const Dashboard = () => {
               </div>
             ) : (
               <div className="dash-cat-bars">
-                <CategoryBar label="Pessoal" count={personal} total={totalCat} color="blue" />
-                <CategoryBar label="Carreira" count={career} total={totalCat} color="pink" />
-                <CategoryBar label="Saúde" count={academia} total={totalCat} color="green" />
+                <CategoryBar label="Corpo" count={corpo} total={totalCat} color="blue" />
+                <CategoryBar label="Mente" count={mente} total={totalCat} color="purple" />
+                <CategoryBar label="Carreira" count={carreira} total={totalCat} color="pink" />
+                <CategoryBar label="Vida" count={vida} total={totalCat} color="orange" />
               </div>
             )}
           </div>
