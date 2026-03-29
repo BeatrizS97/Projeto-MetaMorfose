@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authService } from '../../services/api';
 import { validators } from '../../utils/validators';
-import { ButterflyAuthIcon, MailIcon, AlertIcon } from '../../components/icons/CustomIcons';
+import { ButterflyLottieAnimation, MailIcon, AlertIcon } from '../../components/icons/CustomIcons';
 import './Auth.css';
 
 export const ForgotPassword = () => {
@@ -55,7 +55,7 @@ export const ForgotPassword = () => {
       <div className="auth-container">
         <div className="auth-card">
           <div className="auth-header">
-            <ButterflyAuthIcon size={64} className="auth-logo" />
+            <ButterflyLottieAnimation size={120} speed={0.25} className="auth-logo" />
             <h1 className="auth-title">MetaMorfose</h1>
             <p className="auth-year">2026</p>
             <h2 className="auth-subtitle">Recuperar Senha</h2>

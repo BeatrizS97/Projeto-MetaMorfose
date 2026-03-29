@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { validators } from '../../utils/validators';
-import { ButterflyAuthIcon, MailIcon, LockIcon, EyeIcon, EyeOffIcon, WavingHandIcon, AlertIcon } from '../../components/icons/CustomIcons';
+import { ButterflyLottieAnimation, MailIcon, LockIcon, EyeIcon, EyeOffIcon, WavingHandIcon, AlertIcon } from '../../components/icons/CustomIcons';
 import './Auth.css';
 
 export const Login = () => {
@@ -69,7 +69,7 @@ export const Login = () => {
       <div className="auth-container">
         <div className="auth-card">
           <div className="auth-header">
-            <ButterflyAuthIcon size={64} className="auth-logo" />
+            <ButterflyLottieAnimation size={120} speed={0.25} className="auth-logo" />
             <h1 className="auth-title">MetaMorfose</h1>
             <p className="auth-year">2026</p>
             <div className="welcome-message">

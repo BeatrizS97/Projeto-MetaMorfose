@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/api';
 import { validators } from '../../utils/validators';
-import { ButterflyAuthIcon, MailIcon, LockIcon, EyeIcon, EyeOffIcon, ProfileIcon as UserIcon, AlertIcon } from '../../components/icons/CustomIcons';
+import { ButterflyLottieAnimation, MailIcon, LockIcon, EyeIcon, EyeOffIcon, ProfileIcon as UserIcon, AlertIcon } from '../../components/icons/CustomIcons';
 import './Auth.css';
 
 export const Register = () => {
@@ -95,7 +95,7 @@ export const Register = () => {
       <div className="auth-container">
         <div className="auth-card">
           <div className="auth-header">
-            <ButterflyAuthIcon size={64} className="auth-logo" />
+            <ButterflyLottieAnimation size={120} speed={0.25} className="auth-logo" />
             <h1 className="auth-title">MetaMorfose</h1>
             <p className="auth-year">2026</p>
             <h2 className="auth-subtitle">Crie sua conta</h2>
