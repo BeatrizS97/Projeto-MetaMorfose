@@ -4,8 +4,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const config = require('./config/env');
+const { verifyCsrfToken } = require('./middleware/csrf');
 
 // Importar rotas
 const authRoutes = require('./routes/auth');
@@ -13,6 +16,23 @@ const goalsRoutes = require('./routes/goals');
 const userRoutes = require('./routes/user');
 
 const app = express();
+
+mongoose.set('sanitizeFilter', true);
+
+if (config.TRUST_PROXY) {
+  app.set('trust proxy', 1);
+}
+
+if (config.ENFORCE_HTTPS) {
+  app.use((req, res, next) => {
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    if (forwardedProto && forwardedProto !== 'https') {
+      return res.status(426).json({ error: 'HTTPS obrigatório em produção' });
+    }
+
+    return next();
+  });
+}
 
 // Middleware de segurança e performance
 
@@ -41,19 +61,64 @@ app.use(helmet({
  */
 app.use(compression());
 
+/**
+ * Rate limiter global da API para reduzir abuso de endpoints.
+ */
+const apiLimiter = rateLimit({
+  windowMs: config.RATE_LIMIT_WINDOW_MS,
+  max: config.API_RATE_LIMIT_MAX_REQUESTS,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => config.NODE_ENV === 'development',
+  message: {
+    error: 'Muitas requisições. Tente novamente em alguns minutos.',
+  },
+});
+
+app.use('/api', apiLimiter);
+
 // Middleware de parsing - Limitar tamanho para evitar DoS
 
 /**
  * Limitar tamanho do corpo da requisição
  * Protege contra DoS por upload grande
  */
-app.use(express.json({ limit: '10kb' })); // Limite de 10KB
-app.use(express.urlencoded({ limit: '10kb', extended: true }));
+app.use(express.json({ limit: '1mb' })); // Permite avatar compactado sem abrir demais a superficie de ataque
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
+
+/**
+ * Sanitização simples para bloquear operadores de injeção no payload ($ e .)
+ */
+const hasDangerousKeys = (value) => {
+  if (Array.isArray(value)) {
+    return value.some(hasDangerousKeys);
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.entries(value).some(([key, nestedValue]) => {
+      if (key.startsWith('$') || key.includes('.')) {
+        return true;
+      }
+      return hasDangerousKeys(nestedValue);
+    });
+  }
+
+  return false;
+};
+
+app.use((req, res, next) => {
+  if (hasDangerousKeys(req.body) || hasDangerousKeys(req.query) || hasDangerousKeys(req.params)) {
+    return res.status(400).json({ error: 'Payload inválido' });
+  }
+
+  return next();
+});
 
 /**
  * Cookie Parser - Parsear cookies
  */
 app.use(cookieParser());
+app.use(verifyCsrfToken);
 
 // Middleware de CORS - Configurado com segurança
 
@@ -62,10 +127,22 @@ app.use(cookieParser());
  * Configurado com segurança em mente
  */
 app.use(cors({
-  origin: config.CORS_ORIGIN,
+  origin: (origin, callback) => {
+    // Permite clientes sem header Origin (curl, health checks internos)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const allowedOrigins = config.CORS_ORIGIN;
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Origem não permitida pelo CORS'));
+  },
   credentials: true, // Permitir cookies
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
   maxAge: 86400, // 24 horas
 }));
 
@@ -81,7 +158,7 @@ app.disable('x-powered-by');
  * Middleware para adicionar ID de requisição (para logging)
  */
 app.use((req, res, next) => {
-  req.id = Math.random().toString(36).substr(2, 9);
+  req.id = crypto.randomUUID();
   next();
 });
 
@@ -112,7 +189,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: isConnected ? 'ok' : 'disconnected',
     timestamp: new Date().toISOString(),
-    environment: config.NODE_ENV,
+    uptimeSeconds: Math.floor(process.uptime()),
     mongodb: isConnected ? 'connected' : 'disconnected',
   });
 });
@@ -140,8 +217,6 @@ app.use('/api/user', userRoutes);
 app.use((req, res) => {
   res.status(404).json({
     error: 'Rota não encontrada',
-    path: req.originalUrl,
-    method: req.method,
   });
 });
 
@@ -156,7 +231,7 @@ app.use((err, req, res, next) => {
   const message = err.message || 'Erro interno do servidor';
 
   res.status(status).json({
-    error: message,
+    error: status >= 500 && config.NODE_ENV !== 'development' ? 'Erro interno do servidor' : message,
     requestId: req.id,
     timestamp: new Date().toISOString(),
     ...(config.NODE_ENV === 'development' && { stackTrace: err.stack }),
@@ -172,7 +247,7 @@ const server = app.listen(config.PORT, () => {
 ║  Ambiente: ${config.NODE_ENV.padEnd(37)}║
 ║  Porta: ${config.PORT.toString().padEnd(42)}║
 ║  URL: http://localhost:${config.PORT}${' '.repeat(30)}║
-║  CORS Origin: ${config.CORS_ORIGIN.padEnd(32)}║
+║  CORS Origins: ${config.CORS_ORIGIN.join(', ').padEnd(31)}║
 ║  Secure Cookie: ${config.SECURE_COOKIE.toString().padEnd(30)}║
 ╚════════════════════════════════════════════════════╝
   `);
