@@ -2,6 +2,7 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config/env');
 const { ERRORS } = require('../utils/constants');
+const { clearCsrfCookie } = require('./csrf');
 
 /**
  * Middleware para verificar autenticação via JWT do cookie
@@ -13,13 +14,22 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: ERRORS.NO_TOKEN_PROVIDED });
   }
 
-  jwt.verify(token, config.JWT_SECRET, (err, user) => {
+  jwt.verify(
+    token,
+    config.JWT_SECRET,
+    {
+      algorithms: ['HS256'],
+      issuer: config.JWT_ISSUER,
+      audience: config.JWT_AUDIENCE,
+    },
+    (err, user) => {
     if (err) {
       return res.status(403).json({ error: ERRORS.INVALID_TOKEN });
     }
     req.userId = user.id;
     next();
-  });
+    }
+  );
 };
 
 /**
@@ -49,6 +59,8 @@ const clearAuthCookie = (res) => {
     sameSite: 'strict',
     path: '/',
   });
+
+  clearCsrfCookie(res);
 };
 
 module.exports = {
