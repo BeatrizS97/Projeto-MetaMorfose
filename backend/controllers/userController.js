@@ -46,6 +46,7 @@ exports.updateProfile = async (req, res) => {
     // Atualizar usuário
     const user = await User.findByIdAndUpdate(req.userId, updateData, { new: true });
 
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.json({
       success: true,
       user: {
@@ -98,6 +99,7 @@ exports.changePassword = async (req, res) => {
       lgpdRelevant: true,
     });
 
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.json({
       success: true,
       message: 'Senha alterada com sucesso',
@@ -150,6 +152,7 @@ exports.deleteAccount = async (req, res) => {
     // Limpar cookie
     clearAuthCookie(res);
 
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.json({
       success: true,
       message: 'Conta deletada com sucesso',
