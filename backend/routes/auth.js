@@ -23,6 +23,15 @@ const loginLimiter = rateLimit({
   },
 });
 
+const forgotPasswordLimiter = rateLimit({
+  windowMs: config.RATE_LIMIT_WINDOW_MS,
+  max: Math.max(3, Math.floor(config.RATE_LIMIT_MAX_REQUESTS / 2)),
+  message: { error: 'Muitas tentativas de recuperação. Tente novamente mais tarde.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => config.NODE_ENV === 'development',
+});
+
 /**
  * POST /api/auth/register
  * Registrar novo usuário
@@ -51,6 +60,7 @@ router.post(
  */
 router.post(
   '/forgot-password',
+  forgotPasswordLimiter,
   validationRules.forgotPasswordValidation,
   authController.forgotPassword
 );
@@ -66,5 +76,11 @@ router.get('/verify', authenticateToken, authController.verify);
  * Fazer logout
  */
 router.post('/logout', authenticateToken, authController.logout);
+
+/**
+ * GET /api/auth/csrf-token
+ * Obter token CSRF para requests mutáveis
+ */
+router.get('/csrf-token', authController.csrfToken);
 
 module.exports = router;
