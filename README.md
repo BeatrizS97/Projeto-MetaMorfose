@@ -1,6 +1,7 @@
-# MetaMorfose
+# MetaMorfose - Plataforma Full Stack de Gestão de Metas
 
-Aplicacao full stack para planejamento de metas, com autenticacao segura, organizacao por periodo e dashboard de performance.
+O MetaMorfose é uma aplicação Full Stack para planejamento pessoal e acompanhamento de produtividade. 
+Mais do que uma lista de tarefas, o sistema oferece ciclos de metas por período, visão analítica de progresso e fluxo seguro de autenticação para manter os dados protegidos.
 
 ![Node](https://img.shields.io/badge/Node-20.x-3C873A?style=flat-square)
 ![React](https://img.shields.io/badge/React-19.x-149ECA?style=flat-square)
@@ -10,122 +11,164 @@ Aplicacao full stack para planejamento de metas, com autenticacao segura, organi
 
 ---
 
-## Sumario
+## Sumário
 
-- [Resumo](#resumo)
-- [Arquitetura](#arquitetura)
-- [Funcionalidades](#funcionalidades)
-- [Stack Tecnica](#stack-tecnica)
-- [Como Rodar](#como-rodar)
-- [Variaveis de Ambiente](#variaveis-de-ambiente)
-- [API](#api)
-- [Scripts](#scripts)
-- [Qualidade](#qualidade)
-- [Documentacao por Camada](#documentacao-por-camada)
+- [Visão Geral](#visão-geral)
+- [Capturas de Tela](#capturas-de-tela)
+- [Funcionalidades de Alto Nível](#funcionalidades-de-alto-nível)
+- [Pilha Tecnológica](#pilha-tecnológica)
+- [Segurança Aplicada](#segurança-aplicada)
+- [Como Executar Localmente](#como-executar-localmente)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Endpoints da API](#endpoints-da-api)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Roteiro (V2.0)](#roteiro-v20)
 
-## Resumo
+## Visão Geral
 
-MetaMorfose foi projetado para acompanhar metas pessoais, de carreira e de saude com foco em clareza e progresso continuo.
+O MetaMorfose foi projetado para ajudar usuários a definir, executar e revisar metas em ciclos recorrentes:
 
-- Autenticacao com JWT em cookie HTTP-only.
-- Metas por categoria: personal, career e academia (rotulo de UI: Saude).
-- Metas por periodo: day, week, month e year.
-- Dashboard com total, concluidas, pendentes, taxa de conclusao e distribuicao por categoria.
+- Categorias de metas: corpo, mente, carreira e vida.
+- Períodos de acompanhamento: dia, semana, mês e ano.
+- Dashboard com métricas globais e evolução por categoria.
+- Perfil com atualização de dados, troca de senha e exportação LGPD.
 
-## Arquitetura
+## Capturas de Tela
 
-```text
-projeto-metamorfose/
-  backend/    API REST, regras de negocio, persistencia, seguranca
-  frontend/   Interface React, paginas, estado de autenticacao e consumo da API
-```
+Sugestão de seções para imagens no repositório:
 
-Fluxo geral:
+- Landing page
+- Quadro de metas por período
+- Dashboard de métricas
+- Página de perfil e exportação de dados
 
-1. Frontend autentica o usuario.
-2. Backend emite cookie de sessao seguro.
-3. Frontend consome goals/stats com credentials: include.
-4. Dashboard renderiza metricas por periodo.
+## Funcionalidades de Alto Nível
 
-## Funcionalidades
+### Gestão de Metas
 
-- Cadastro, login, verify de sessao e logout.
-- Recuperacao de senha (fluxo inicial integrado).
-- CRUD de metas.
-- Concluir/reabrir metas.
-- Visualizacao por periodo (diario, semanal, mensal, anual).
-- Perfil de usuario com alteracao de senha e exportacao de dados.
+- CRUD completo de metas.
+- Controle de status (concluída ou pendente).
+- Segmentação por período e categoria.
+- Ordenação e visualização com foco em fluxo de execução.
 
-## Stack Tecnica
+### Identidade e Sessão
+
+- Cadastro, login, verificação de sessão e logout.
+- JWT em cookie HttpOnly (não exposto ao JavaScript do navegador).
+- Recuperação de senha com resposta genérica para reduzir enumeração de usuários.
+
+### Painel e Experiência
+
+- Dashboard com total, concluídas, pendentes e taxa de conclusão.
+- Interface responsiva para desktop e mobile.
+- Componentização de UI para reuso e manutenção.
+
+### Governança de Dados
+
+- Exportação de dados pessoais (LGPD).
+- Reautenticação por senha para exportação sensível.
+
+## Pilha Tecnológica
 
 | Camada | Tecnologias |
 |---|---|
-| Frontend | React 19, React Router 7, Vite 7, ESLint |
-| Backend | Node.js, Express, Mongoose, express-validator |
-| Seguranca | Helmet, CORS, Rate Limit, cookies HTTP-only |
+| Front-end | React 19, Vite 7, React Router 7, ESLint |
+| Back-end | Node.js, Express, Mongoose, Express Validator |
 | Banco | MongoDB |
+| Segurança | JWT, Bcrypt, Helmet, CORS, Rate Limit, CSRF (double-submit cookie) |
 
-## Como Rodar
+## Segurança Aplicada
 
-### Pre-requisitos
+O backend foi endurecido com medidas práticas para proteger endpoints e reduzir risco de abuso:
 
-- Node.js 20+
-- npm 10+
-- MongoDB local ativo em localhost:27017
+- Validação rigorosa de JWT (algoritmo, issuer e audience).
+- Cookies de sessão com HttpOnly, SameSite e Secure em produção.
+- Proteção CSRF para operações mutáveis (POST, PUT, PATCH, DELETE).
+- Endpoint dedicado de token CSRF.
+- Rate limiting global em API e limitador dedicado para recuperação de senha.
+- Sanitização de payload para bloquear chaves suspeitas de injeção.
+- Controle de cache para respostas sensíveis (no-store).
+- Validação de avatar para aceitar somente HTTPS ou data URL de imagem segura.
 
-### 1) Subir MongoDB
+## Como Executar Localmente
 
-```powershell
-mongod --dbpath C:\data\db
+### Pré-requisitos
+
+- Node.js 18 ou superior
+- npm
+- MongoDB local ou remoto
+
+### 1. Clonar o repositório
+
+```bash
+git clone <url-do-repositorio>
+cd projeto-metamorfose
 ```
 
-### 2) Rodar Backend
+### 2. Configurar e iniciar o backend
 
-```powershell
+```bash
 cd backend
 npm install
 npm run dev
 ```
 
-API: http://localhost:5000
+API local:
 
-### 3) Rodar Frontend
+http://localhost:5000
 
-```powershell
+### 3. Configurar e iniciar o frontend
+
+Em outro terminal:
+
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-App: http://localhost:3000
+Aplicação local:
 
-## Variaveis de Ambiente
+http://localhost:3000
 
-Crie backend/.env:
+## Variáveis de Ambiente
+
+### Backend (.env em backend)
 
 ```env
 PORT=5000
 NODE_ENV=development
-TARGET_ENV=development
 
-MONGODB_URI=mongodb://localhost:27017/metas-2025
+MONGODB_URI=mongodb://localhost:27017/metamorfose
 
-JWT_SECRET=troque_por_um_valor_forte
+JWT_SECRET=sua_chave_secreta_forte
 JWT_EXPIRES_IN=24h
+JWT_ISSUER=metamorfose-api
+JWT_AUDIENCE=metamorfose-web
 
 CORS_ORIGIN=http://localhost:3000
 
 BCRYPT_ROUNDS=10
+TRUST_PROXY=false
+ENFORCE_HTTPS=true
+
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=5
+API_RATE_LIMIT_MAX_REQUESTS=120
 ```
 
-Obrigatorias:
+Obrigatórias:
 
 - JWT_SECRET
 - MONGODB_URI
 
-## API
+### Frontend (.env.local em frontend)
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+## Endpoints da API
 
 ### Health
 
@@ -136,6 +179,7 @@ Obrigatorias:
 - POST /api/auth/register
 - POST /api/auth/login
 - POST /api/auth/forgot-password
+- GET /api/auth/csrf-token
 - GET /api/auth/verify
 - POST /api/auth/logout
 
@@ -153,43 +197,26 @@ Obrigatorias:
 - PUT /api/user/profile
 - PUT /api/user/password
 - DELETE /api/user/account
-- GET /api/user/export
+- POST /api/user/export
 
-## Scripts
+## Estrutura do Projeto
 
-### Backend
-
-- npm start
-- npm run dev
-
-### Frontend
-
-- npm run dev
-- npm run build
-- npm run preview
-- npm run lint
-
-## Qualidade
-
-Validacao rapida do frontend:
-
-```powershell
-cd frontend
-npm run build
+```text
+projeto-metamorfose/
+ ┣ backend/   -> API REST (Node.js + Express + MongoDB)
+ ┗ frontend/  -> Interface web (React + Vite)
 ```
 
-Validacao rapida do backend:
+## Roteiro (V2.0)
 
-```powershell
-cd backend
-node --check server.js
-```
+Evoluções sugeridas:
 
-## Documentacao por Camada
-
-- [backend/README.md](backend/README.md)
-- [frontend/README.md](frontend/README.md)
+- Refresh token com rotação e revogação de sessão.
+- Testes automatizados (unitários + integração + e2e).
+- Observabilidade com métricas e alertas de segurança.
+- Dashboard com análises de uso e retenção.
+- Empacotamento com Docker para padronizar ambiente.
 
 ---
 
-Uso interno/projeto academico. Ajuste licenca e politicas conforme o destino do projeto.
+Projeto mantido para fins de aprendizado e evolução contínua de FullStack Júnior.
