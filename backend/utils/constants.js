@@ -1,9 +1,12 @@
 // utils/constants.js - Constantes da aplicação
 
 module.exports = {
-  // Categorias de metas
-  GOAL_CATEGORIES: ['personal', 'career', 'academia'],
-  
+  // Regex compartilhado para manter consistencia entre model e middleware.
+  EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+
+  // Categorias de metas atualizadas
+  GOAL_CATEGORIES: ['corpo', 'mente', 'carreira', 'vida'],
+
   // Períodos de metas
   GOAL_PERIODS: ['day', 'week', 'month', 'year'],
   
@@ -27,6 +30,9 @@ module.exports = {
     description: {
       minLength: 1,
       maxLength: 1000,
+    },
+    avatar: {
+      maxLength: 500000,
     },
   },
   
