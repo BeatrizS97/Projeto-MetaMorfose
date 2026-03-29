@@ -17,9 +17,9 @@ exports.getGoals = async (req, res) => {
     if (completed !== undefined) filter.completed = completed === 'true';
     if (period) filter.period = period;
 
-    // Buscar metas com ordenação
+    // Buscar metas com ordenação persistente definida pelo usuário
     const goals = await Goal.find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ order: 1, createdAt: -1 })
       .lean(); // .lean() para melhor performance (retorna objetos simples)
 
     res.json({
@@ -45,12 +45,28 @@ exports.createGoal = async (req, res) => {
 
   try {
     const { title, description, category, period } = req.body;
+    const normalizedPeriod = period || 'month';
+
+    // Mantém ordem incremental por usuário/categoria/período para suportar drag-and-drop
+    const lastGoalInLane = await Goal.findOne({
+      userId: req.userId,
+      category,
+      period: normalizedPeriod,
+    })
+      .sort({ order: -1, createdAt: -1 })
+      .select('order')
+      .lean();
+
+    const nextOrder = Number.isFinite(lastGoalInLane?.order)
+      ? lastGoalInLane.order + 1
+      : 0;
 
     const newGoal = new Goal({
       title,
       description,
       category,
-      period: period || 'month',
+      period: normalizedPeriod,
+      order: nextOrder,
       userId: req.userId,
     });
 
@@ -184,12 +200,13 @@ exports.getStats = async (req, res) => {
     const dateFilter = startDate ? { ...baseFilter, createdAt: { $gte: startDate } } : baseFilter;
 
     // Realizar queries em paralelo para performance
-    const [totalCount, completedCount, personalCount, careerCount, academiaCount] = await Promise.all([
+    const [totalCount, completedCount, corpoCount, menteCount, carreiraCount, vidaCount] = await Promise.all([
       Goal.countDocuments(dateFilter),
       Goal.countDocuments({ ...dateFilter, completed: true }),
-      Goal.countDocuments({ ...dateFilter, category: 'personal' }),
-      Goal.countDocuments({ ...dateFilter, category: 'career' }),
-      Goal.countDocuments({ ...dateFilter, category: 'academia' }),
+      Goal.countDocuments({ ...dateFilter, category: 'corpo' }),
+      Goal.countDocuments({ ...dateFilter, category: 'mente' }),
+      Goal.countDocuments({ ...dateFilter, category: 'carreira' }),
+      Goal.countDocuments({ ...dateFilter, category: 'vida' }),
     ]);
 
     const completionRate = totalCount > 0 ? ((completedCount / totalCount) * 100).toFixed(1) : 0;
@@ -203,9 +220,10 @@ exports.getStats = async (req, res) => {
         pending: totalCount - completedCount,
         completionRate: parseFloat(completionRate),
         byCategory: {
-          personal: personalCount,
-          career: careerCount,
-          academia: academiaCount,
+          corpo: corpoCount,
+          mente: menteCount,
+          carreira: carreiraCount,
+          vida: vidaCount,
         },
       },
     });
