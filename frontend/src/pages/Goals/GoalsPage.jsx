@@ -4,6 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { goalsService } from '../../services/api';
 import { GoalCard } from './GoalCard';
 import { AddGoalModal } from './AddGoalModal';
+import { Pagination } from '../../components/common/Pagination/Pagination';
 import './GoalsPage.css';
 
 // Icons personalizados para as categorias de metas e elementos visuais da página
@@ -13,51 +14,31 @@ const PlusIcon = () => (
   </svg>
 );
 
-const PersonalIcon = () => (
+// Novos ícones para as categorias
+const CorpoIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <defs>
-      <linearGradient id="pi-g" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#667EEA"/>
-        <stop offset="100%" stopColor="#764BA2"/>
-      </linearGradient>
-    </defs>
-    <circle cx="12" cy="8" r="4" stroke="url(#pi-g)" strokeWidth="2.2" fill="none"/>
-    <path d="M5 20C5 17 8.13 14.5 12 14.5C15.87 14.5 19 17 19 20"
-          stroke="url(#pi-g)" strokeWidth="2.2" strokeLinecap="round"/>
+    <circle cx="12" cy="12" r="10" stroke="#4ADE80" strokeWidth="2" fill="none"/>
+    <path d="M12 8C13.5 8 15 9.5 15 11C15 12.5 13.5 14 12 14C10.5 14 9 12.5 9 11C9 9.5 10.5 8 12 8Z" stroke="#4ADE80" strokeWidth="2" fill="none"/>
   </svg>
 );
-
-const CareerIcon = () => (
+const MenteIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <defs>
-      <linearGradient id="ci-g" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#FF6B9D"/>
-        <stop offset="100%" stopColor="#FFA500"/>
-      </linearGradient>
-    </defs>
-    <path d="M9 3H15C15.55 3 16 3.45 16 4V7H8V4C8 3.45 8.45 3 9 3Z"
-          stroke="url(#ci-g)" strokeWidth="2" fill="none"/>
-    <rect x="3" y="7" width="18" height="14" rx="2"
-          stroke="url(#ci-g)" strokeWidth="2" fill="none"/>
-    <path d="M3 13H21M12 13V21"
-          stroke="url(#ci-g)" strokeWidth="2" strokeLinecap="round"/>
+    <ellipse cx="12" cy="12" rx="10" ry="8" stroke="#667EEA" strokeWidth="2" fill="none"/>
+    <circle cx="12" cy="12" r="3" stroke="#667EEA" strokeWidth="2" fill="none"/>
   </svg>
 );
-
-const AcademiaIcon = () => (
+const CarreiraIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <defs>
-      <linearGradient id="ai-g" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#4ADE80"/>
-        <stop offset="100%" stopColor="#10B981"/>
-      </linearGradient>
-    </defs>
-    <path d="M12 6C12 6 7 8 4 10C4 10 7 12 12 12C17 12 20 10 20 10C17 8 12 6 12 6Z"
-          stroke="url(#ai-g)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M4 10V16C4 16 7 18.5 12 18.5C17 18.5 20 16 20 16V10"
-          stroke="url(#ai-g)" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M20 10V15" stroke="url(#ai-g)" strokeWidth="2" strokeLinecap="round"/>
-    <circle cx="20" cy="16" r="1.5" fill="url(#ai-g)"/>
+    <rect x="4" y="7" width="16" height="10" rx="2" stroke="#FF6B9D" strokeWidth="2" fill="none"/>
+    <path d="M8 7V5a4 4 0 0 1 8 0v2" stroke="#FF6B9D" strokeWidth="2" fill="none"/>
+  </svg>
+);
+const VidaIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke="#FFA500" strokeWidth="2" fill="none"/>
+    <path d="M8 16c1.5-2 6.5-2 8 0" stroke="#FFA500" strokeWidth="2" fill="none"/>
+    <circle cx="9" cy="10" r="1" fill="#FFA500"/>
+    <circle cx="15" cy="10" r="1" fill="#FFA500"/>
   </svg>
 );
 
@@ -72,31 +53,108 @@ const EmptyBoxIcon = () => (
   </svg>
 );
 
-// Componente para cada coluna de categoria de metas (Pessoal, Carreira, Academia)
-const CategoryColumn = ({ category, goals, onAdd, onToggle, onDelete, period }) => {
+// Constante para definir quantas metas por página
+const ITEMS_PER_PAGE = 5;
+const getGoalId = (goal) => goal.id || goal._id;
+
+const sortGoalsByOrder = (a, b) => {
+  const orderA = Number.isFinite(a.order) ? a.order : Number.MAX_SAFE_INTEGER;
+  const orderB = Number.isFinite(b.order) ? b.order : Number.MAX_SAFE_INTEGER;
+
+  if (orderA !== orderB) return orderA - orderB;
+  return new Date(b.createdAt) - new Date(a.createdAt);
+};
+
+// Componente para cada coluna de categoria de metas (Corpo, Mente, Carreira, Vida)
+const CategoryColumn = ({ category, goals, onAdd, onToggle, onDelete, onReorder, onEdit, period }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [draggedGoalId, setDraggedGoalId] = useState(null);
+  const [dropTargetGoalId, setDropTargetGoalId] = useState(null);
+
   const config = {
-    personal: {
-      label: 'Pessoal',
-      icon: <PersonalIcon />,
-      color: 'blue',
-      tagline: 'Crescimento e bem-estar',
-    },
-    career: {
-      label: 'Carreira',
-      icon: <CareerIcon />,
-      color: 'pink',
-      tagline: 'Trabalho e desenvolvimento',
-    },
-    academia: {
-      label: 'Saúde',
-      icon: <AcademiaIcon />,
+    corpo: {
+      label: 'Corpo',
+      icon: <CorpoIcon />,
       color: 'green',
-      tagline: 'Saúde e exercícios',
+      tagline: 'Fitness, alimentação, sono',
+    },
+    mente: {
+      label: 'Mente',
+      icon: <MenteIcon />,
+      color: 'blue',
+      tagline: 'Estudo, leitura, hábitos',
+    },
+    carreira: {
+      label: 'Carreira',
+      icon: <CarreiraIcon />,
+      color: 'pink',
+      tagline: 'Trabalho, dinheiro, projetos',
+    },
+    vida: {
+      label: 'Vida',
+      icon: <VidaIcon />,
+      color: 'orange',
+      tagline: 'Relacionamentos, hobbies, lazer',
     },
   }[category];
 
   // Calcula quantas metas estão concluídas para mostrar no header da coluna e na barra de progresso
   const completed = goals.filter(g => g.completed).length;
+
+  const orderedGoals = [...goals].sort(sortGoalsByOrder);
+
+  // Lógica de paginação
+  const totalPages = Math.ceil(orderedGoals.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedGoals = orderedGoals.slice(startIndex, endIndex);
+
+  const moveGoalByStep = (goalId, step) => {
+    const orderedIds = orderedGoals.map(getGoalId);
+    const fromIndex = orderedIds.indexOf(goalId);
+    const toIndex = fromIndex + step;
+
+    if (fromIndex === -1 || toIndex < 0 || toIndex >= orderedIds.length) {
+      return;
+    }
+
+    const nextOrderedIds = [...orderedIds];
+    const [movedGoalId] = nextOrderedIds.splice(fromIndex, 1);
+    nextOrderedIds.splice(toIndex, 0, movedGoalId);
+
+    onReorder(category, nextOrderedIds);
+  };
+
+  const handleDrop = (targetGoalId) => {
+    if (!draggedGoalId || draggedGoalId === targetGoalId) {
+      setDraggedGoalId(null);
+      setDropTargetGoalId(null);
+      return;
+    }
+
+    const orderedIds = orderedGoals.map(getGoalId);
+    const fromIndex = orderedIds.indexOf(draggedGoalId);
+    const toIndex = orderedIds.indexOf(targetGoalId);
+
+    if (fromIndex === -1 || toIndex === -1) {
+      setDraggedGoalId(null);
+      setDropTargetGoalId(null);
+      return;
+    }
+
+    const nextOrderedIds = [...orderedIds];
+    const [movedGoalId] = nextOrderedIds.splice(fromIndex, 1);
+    nextOrderedIds.splice(toIndex, 0, movedGoalId);
+
+    onReorder(category, nextOrderedIds);
+    setDraggedGoalId(null);
+    setDropTargetGoalId(null);
+  };
+
+  // Reseta para primeira página quando a categoria muda ou falha
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [goals.length]);
 
   return (
     <div className={`goals-col goals-col--${config.color}`}>
@@ -125,7 +183,7 @@ const CategoryColumn = ({ category, goals, onAdd, onToggle, onDelete, period }) 
       )}
 
       {/* Goals List */}
-      <div className="goals-col__list">
+      <div className="goals-col__list" role="list" aria-label={`Lista de metas ${config.label}`}>
         {goals.length === 0 ? (
           <div className="goals-col__empty">
             <EmptyBoxIcon />
@@ -133,17 +191,72 @@ const CategoryColumn = ({ category, goals, onAdd, onToggle, onDelete, period }) 
             <span>Clique em + para adicionar</span>
           </div>
         ) : (
-          goals.map((goal, i) => (
-            <GoalCard
-              key={goal.id || goal._id}
-              goal={goal}
-              index={i}
-              onToggle={() => onToggle(goal.id || goal._id, goal.completed)}
-              onDelete={() => onDelete(goal.id || goal._id)}
-            />
-          ))
+          paginatedGoals.map((goal, i) => {
+            const goalId = getGoalId(goal);
+            const isDragging = draggedGoalId === goalId;
+            const isDropTarget = dropTargetGoalId === goalId && draggedGoalId !== goalId;
+
+            return (
+              <div
+                key={goalId}
+                className={`goals-col__draggable ${isDragging ? 'goals-col__draggable--dragging' : ''} ${isDropTarget ? 'goals-col__draggable--target' : ''}`}
+                data-goal-id={goalId}
+                draggable
+                tabIndex={0}
+                role="listitem"
+                aria-label={`Meta ${goal.title}. Use seta para cima ou para baixo para reordenar.`}
+                onDragStart={() => {
+                  setDraggedGoalId(goalId);
+                  setDropTargetGoalId(goalId);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    moveGoalByStep(goalId, -1);
+                  }
+
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    moveGoalByStep(goalId, 1);
+                  }
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  if (dropTargetGoalId !== goalId) {
+                    setDropTargetGoalId(goalId);
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  handleDrop(goalId);
+                }}
+                onDragEnd={() => {
+                  setDraggedGoalId(null);
+                  setDropTargetGoalId(null);
+                }}
+              >
+                <GoalCard
+                  goal={goal}
+                  index={i}
+                  onToggle={() => onToggle(goalId, goal.completed)}
+                  onDelete={() => onDelete(goalId)}
+                  onUpdate={(updates) => onEdit(goalId, updates)}
+                />
+              </div>
+            );
+          })
         )}
       </div>
+
+      {/* Pagination */}
+      {goals.length > ITEMS_PER_PAGE && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          variant="simple"
+        />
+      )}
 
       {/* Add button */}
       <button
@@ -255,6 +368,53 @@ export const GoalsPage = () => {
     }
   };
 
+  const handleReorder = async (category, orderedIds) => {
+    const orderMap = new Map(orderedIds.map((id, index) => [id, index]));
+
+    setGoals(prev => prev.map(goal => {
+      const goalId = getGoalId(goal);
+      const isSameLane = goal.category === category && (goal.period === period || (!goal.period && period === 'month'));
+
+      if (!isSameLane || !orderMap.has(goalId)) {
+        return goal;
+      }
+
+      return {
+        ...goal,
+        order: orderMap.get(goalId),
+      };
+    }));
+
+    try {
+      await Promise.all(
+        orderedIds.map((goalId, order) => goalsService.update(goalId, { order }))
+      );
+    } catch (err) {
+      console.error(err);
+      await loadGoals();
+    }
+  };
+
+  const handleEdit = async (id, updates) => {
+    try {
+      await goalsService.update(id, updates);
+      setGoals((prev) => prev.map((goal) => {
+        const goalId = getGoalId(goal);
+        if (goalId !== id) {
+          return goal;
+        }
+
+        return {
+          ...goal,
+          ...updates,
+        };
+      }));
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
   // Função para abrir o modal de adição de metas, definindo a categoria selecionada para o modal
   const openModal = (category) => {
     setModalCategory(category);
@@ -337,7 +497,7 @@ export const GoalsPage = () => {
         </div>
       ) : (
         <div className="goals-columns">
-          {['personal', 'career', 'academia'].map(cat => (
+          {['corpo', 'mente', 'carreira', 'vida'].map(cat => (
             <CategoryColumn
               key={cat}
               category={cat}
@@ -345,6 +505,8 @@ export const GoalsPage = () => {
               onAdd={openModal}
               onToggle={handleToggle}
               onDelete={handleDelete}
+              onReorder={handleReorder}
+              onEdit={handleEdit}
               period={period}
             />
           ))}
