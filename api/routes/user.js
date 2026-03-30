@@ -2,7 +2,7 @@ import { authenticate } from '../middlewares/authenticate';
 import { getUserById } from '../controllers/userController';
 
 
-import cors from '../cors';
+import cors from '../utils/cors';
 import rateLimit from '../middlewares/rateLimit';
 import { authenticate } from '../middlewares/authenticate';
 import { getUserById } from '../controllers/userController';
