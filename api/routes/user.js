@@ -1,14 +1,10 @@
-import { authenticate } from '../middlewares/authenticate';
-import { getUserById } from '../controllers/userController';
-
-
-import cors from '../utils/cors';
-import rateLimit from '../middlewares/rateLimit';
-import { authenticate } from '../middlewares/authenticate';
-import { getUserById } from '../controllers/userController';
-import prisma from '../prisma/client';
+import { authenticate } from '../../middlewares/authenticate';
+import { getUserById } from '../../controllers/userController';
+import cors from '../../utils/cors';
+import rateLimit from '../../middlewares/rateLimit';
+import prisma from '../../prisma/client';
 import bcrypt from 'bcryptjs';
-import { validatePassword } from '../validators/userValidator';
+import { validatePassword } from '../../validators/userValidator';
 
 function runCors(req, res) {
   return new Promise((resolve, reject) => {
@@ -46,7 +42,7 @@ async function handler(req, res) {
   // GET /api/user/auditlog
   if (req.method === 'GET' && req.url && req.url.startsWith('/auditlog')) {
     // Lazy import para evitar dependência circular
-    const { getAuditLogs } = await import('../controllers/auditLogController.js');
+    const { getAuditLogs } = await import('../../controllers/auditLogController.js');
     const logs = await getAuditLogs(userId);
     return res.status(200).json(logs);
   }

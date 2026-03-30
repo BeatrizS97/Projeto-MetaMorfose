@@ -1,8 +1,8 @@
 
 import cors from '../cors';
-import rateLimit from '../middlewares/rateLimit';
-import { registerUser, loginUser } from '../controllers/authController';
-import { validateEmail, validatePassword } from '../validators/userValidator';
+import rateLimit from '../../middlewares/rateLimit';
+import { login, register, forgotPassword } from '../../controllers/authController';
+import { validateUser } from '../../validators/userValidator';
 import Tokens from 'csrf';
 
 const tokens = new Tokens();

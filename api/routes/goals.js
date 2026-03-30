@@ -1,10 +1,10 @@
 
-import cors from '../cors';
-import rateLimit from '../middlewares/rateLimit';
-import { authenticate } from '../middlewares/authenticate';
-import { getGoals, createGoal, updateGoal, deleteGoal } from '../controllers/goalsController';
-import { validateGoal } from '../validators/goalValidator';
-import prisma from '../prisma/client';
+import cors from '../../utils/cors';
+import rateLimit from '../../middlewares/rateLimit';
+import { authenticate } from '../../middlewares/authenticate';
+import { getGoals, createGoal, updateGoal, deleteGoal } from '../../controllers/goalsController';
+import { validateGoal } from '../../validators/goalValidator';
+import prisma from '../../prisma/client';
 
 // Helper para garantir execução síncrona do CORS
 function runCors(req, res) {
