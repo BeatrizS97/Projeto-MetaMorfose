@@ -43,6 +43,14 @@ async function handler(req, res) {
     return res.status(200).json({ user });
   }
 
+  // GET /api/user/auditlog
+  if (req.method === 'GET' && req.url && req.url.startsWith('/auditlog')) {
+    // Lazy import para evitar dependência circular
+    const { getAuditLogs } = await import('../controllers/auditLogController.js');
+    const logs = await getAuditLogs(userId);
+    return res.status(200).json(logs);
+  }
+
   // PUT /api/user/password
   if (req.method === 'PUT' && req.url && req.url.startsWith('/password')) {
     const { currentPassword, newPassword } = req.body;
