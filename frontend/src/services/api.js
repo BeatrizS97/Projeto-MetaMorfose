@@ -149,16 +149,15 @@ export const goalsService = {
   },
 
   async update(id, updates) {
-    const data = await apiFetch(`/goals/${id}`, {
+    const data = await apiFetch(`/goals?id=${id}`, {
       method: 'PUT',
       body: JSON.stringify(updates)
     });
-
     return normalizeGoal(data.goal);
   },
 
   async delete(id) {
-    return apiFetch(`/goals/${id}`, {
+    return apiFetch(`/goals?id=${id}`, {
       method: 'DELETE'
     });
   }
