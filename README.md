@@ -19,7 +19,6 @@ Plataforma SaaS Full Stack para gestão de metas pessoais, com ciclos por perío
 [![Node](https://img.shields.io/badge/Node-20.x-3C873A?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![React](https://img.shields.io/badge/React-19.x-149ECA?style=for-the-badge&logo=react&logoColor=white)](https://react.dev)
 [![Express](https://img.shields.io/badge/Express-4.x-222222?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Local-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com)
 [![Vite](https://img.shields.io/badge/Vite-7.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 
 <br/>
