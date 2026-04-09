@@ -1,0 +1,6 @@
+# Ignorar CSS se for de bibliotecas/frameworks
+*.css linguist-generated=true
+
+
+dist/** linguist-generated=true
+build/** linguist-vendored=true
